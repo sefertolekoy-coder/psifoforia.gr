@@ -1,0 +1,49 @@
+<!doctype html>
+<html lang="el">
+<head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>psifoforia.gr — Ψηφοφορία</title>
+<style>
+*{box-sizing:border-box}body{margin:0;font-family:Arial,sans-serif;background:#f3f6fb;color:#172033}
+header{background:#142b53;color:white;padding:28px 16px;text-align:center}header h1{margin:0;font-size:clamp(28px,5vw,42px)}header p{margin:10px 0 0;color:#dce7ff}
+main{max-width:950px;margin:28px auto;padding:0 16px}.card{background:white;border-radius:18px;padding:22px;margin:18px 0;box-shadow:0 5px 22px #142b5312}
+.candidates{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:18px}
+.candidate{border:1px solid #dbe3f0;border-radius:16px;padding:22px;text-align:center}
+.avatar{height:90px;width:90px;border-radius:50%;margin:0 auto 12px;background:#e8eef9;display:grid;place-items:center;font-size:38px}
+button{border:0;border-radius:10px;padding:13px 18px;font-size:17px;font-weight:bold;cursor:pointer}
+.vote{background:#2458bd;color:white;width:100%}.vote:hover{background:#173e8a}
+.count{font-size:28px;font-weight:bold;margin:14px 0 6px}.muted{color:#637087;font-size:14px}
+progress{width:100%;height:12px;accent-color:#2458bd}
+input,textarea{width:100%;padding:11px;margin:7px 0 13px;border:1px solid #cbd5e1;border-radius:8px;font:inherit}
+.admin{background:#f8fafc}.danger{background:#fee2e2;color:#991b1b}.primary{background:#142b53;color:white}
+.media-item{padding:12px;border-bottom:1px solid #e5eaf2}.media-item img{max-width:100%;max-height:260px;display:block;margin-top:8px}
+footer{text-align:center;color:#718096;padding:25px;font-size:13px}
+</style></head>
+<body>
+<header><h1>psifoforia.gr</h1><p>Η δική σου ψηφοφορία — επίλεξε έναν υποψήφιο</p></header>
+<main>
+<section class="card"><h2>🗳️ Ψήφισε</h2><p class="muted">Επίλεξε ένα από τα δύο ονόματα. Αυτή είναι δοκιμαστική έκδοση: οι ψήφοι αποθηκεύονται μόνο σε αυτόν τον browser.</p>
+<div class="candidates">
+<div class="candidate"><div class="avatar">👤</div><h2>Γιάννης</h2><button class="vote" onclick="cast('giannis')">Ψηφίζω Γιάννη</button><div class="count" id="gcount">0</div><div class="muted">ψήφοι</div></div>
+<div class="candidate"><div class="avatar">👤</div><h2>Μιχάλης</h2><button class="vote" onclick="cast('mihalis')">Ψηφίζω Μιχάλη</button><div class="count" id="mcount">0</div><div class="muted">ψήφοι</div></div>
+</div>
+</section>
+<section class="card"><h2>📊 Αποτελέσματα</h2><p>Γιάννης: <strong id="gpercent">0%</strong></p><progress id="gbar" value="0" max="100"></progress><p>Μιχάλης: <strong id="mpercent">0%</strong></p><progress id="mbar" value="0" max="100"></progress><p class="muted" id="total">Σύνολο: 0 ψήφοι</p></section>
+<section class="card"><h2>📣 Ανακοινώσεις, διαφημίσεις και φωτογραφίες</h2><div id="mediaList"><p class="muted">Δεν έχουν προστεθεί αρχεία ακόμα.</p></div></section>
+<section class="card admin"><h2>🔐 Διαχείριση περιεχομένου</h2><p class="muted">Πρόσθεσε ανακοίνωση, διαφήμιση, έγγραφο ή φωτογραφία. Στη δοκιμαστική έκδοση το περιεχόμενο μένει σε αυτόν τον browser.</p>
+<label>Τίτλος</label><input id="title" placeholder="π.χ. Ανακοίνωση ή διαφήμιση">
+<label>Κείμενο</label><textarea id="description" rows="3" placeholder="Γράψε εδώ το κείμενο..."></textarea>
+<label>Ανέβασε έγγραφο ή φωτογραφία</label><input id="file" type="file" accept="image/*,.pdf,.doc,.docx">
+<button class="primary" onclick="addMedia()">Προσθήκη περιεχομένου</button>
+<button class="danger" onclick="resetVotes()">Μηδενισμός ψήφων</button>
+</section>
+</main><footer>psifoforia.gr · Δοκιμαστική έκδοση — όχι επίσημο ή ασφαλές εκλογικό σύστημα.</footer>
+<script>
+const key='psifoforia_demo_votes';
+function getVotes(){try{return JSON.parse(localStorage.getItem(key))||{giannis:0,mihalis:0}}catch(e){return {giannis:0,mihalis:0}}}
+function render(){let v=getVotes(),t=v.giannis+v.mihalis,g=t?Math.round(v.giannis/t*100):0,m=t?100-g:0;document.getElementById('gcount').textContent=v.giannis;document.getElementById('mcount').textContent=v.mihalis;document.getElementById('gpercent').textContent=g+'%';document.getElementById('mpercent').textContent=m+'%';document.getElementById('gbar').value=g;document.getElementById('mbar').value=m;document.getElementById('total').textContent='Σύνολο: '+t+' ψήφοι'}
+function cast(who){let v=getVotes();v[who]++;localStorage.setItem(key,JSON.stringify(v));render()}
+function addMedia(){let title=document.getElementById('title').value.trim()||'Ανακοίνωση',desc=document.getElementById('description').value.trim(),f=document.getElementById('file').files[0];let item=document.createElement('div');item.className='media-item';let h=document.createElement('h3');h.textContent=title;item.appendChild(h);if(desc){let p=document.createElement('p');p.textContent=desc;item.appendChild(p)}if(f){if(f.type.startsWith('image/')){let img=document.createElement('img');img.src=URL.createObjectURL(f);item.appendChild(img)}else{let p=document.createElement('p');p.textContent='Αρχείο: '+f.name+' (εμφανίζεται μόνο το όνομα σε αυτή τη δοκιμή)';item.appendChild(p)}}document.getElementById('mediaList').prepend(item);document.getElementById('title').value='';document.getElementById('description').value='';document.getElementById('file').value=''}
+function resetVotes(){if(confirm('Να μηδενιστούν οι ψήφοι σε αυτόν τον browser;')){localStorage.removeItem(key);render()}}
+render();
+</script></body></html>
